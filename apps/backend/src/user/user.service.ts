@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { User } from '@prisma/client'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
-
 import { UserRepository } from './user.repository'
+
+export interface UserQuery {
+  id?: number
+  email?: string
+}
 
 @Injectable()
 export class UserService {
@@ -12,8 +16,8 @@ export class UserService {
     return await this.userRepository.findAll()
   }
 
-  async findOne(id: number): Promise<User | null> {
-    const user = await this.userRepository.findOne(id)
+  async findOne(searchQuery: UserQuery): Promise<User | null> {
+    const user = await this.userRepository.findOne(searchQuery)
 
     if (!user) {
       throw new NotFoundException('User with given ID not found')
@@ -26,13 +30,13 @@ export class UserService {
     return await this.userRepository.create(data)
   }
 
-  async update(data: UpdateUserDto, id: number) {
-    const user = await this.findOne(id)
+  async update(data: UpdateUserDto, searchQuery: UserQuery) {
+    const user = await this.findOne(searchQuery)
     return await this.userRepository.update(data, user.id)
   }
 
-  async delete(id: number): Promise<void> {
-    const user = await this.findOne(id)
+  async delete(searchQuery: UserQuery): Promise<void> {
+    const user = await this.findOne(searchQuery)
 
     await this.userRepository.delete(user.id)
   }

@@ -5,7 +5,7 @@ import { UserRepository } from './user.repository'
 import { PrismaService } from 'src/prisma/prisma.service'
 
 @Module({
-  exports: [UserModule],
+  exports: [UserModule, UserService],
   providers: [UserService, UserRepository, PrismaService],
   controllers: [UserController],
 })

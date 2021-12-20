@@ -12,6 +12,7 @@ async function bootstrap() {
     .setTitle('Przewodnik')
     .setDescription('Przewodnik po Wrocławiu')
     .setVersion('1.0')
+    .addBearerAuth()
     .build()
   const document = SwaggerModule.createDocument(app, swaggerOptions)
   SwaggerModule.setup(apiPrefix, app, document)

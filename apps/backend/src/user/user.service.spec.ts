@@ -72,7 +72,7 @@ describe('UserService', () => {
     it('should return user when he exists', async () => {
       userRepository.findOne.mockReturnValue(users[0])
 
-      const returnedUser = await service.findOne(1)
+      const returnedUser = await service.findOne({ id: 1 })
 
       expect(returnedUser.id).toStrictEqual(users[0].id)
     })
@@ -81,7 +81,7 @@ describe('UserService', () => {
       userRepository.findOne.mockReturnValue(null)
       let returnValue
       try {
-        returnValue = await service.findOne(1)
+        returnValue = await service.findOne({ id: 1 })
       } catch (e) {
         expect(e).toStrictEqual(
           new NotFoundException('User with given ID not found'),
@@ -93,7 +93,7 @@ describe('UserService', () => {
     it('should call findOne once', async () => {
       userRepository.findOne.mockReturnValue(users[0])
 
-      await service.findOne(1)
+      await service.findOne({ id: 1 })
 
       expect(userRepository.findOne).toBeCalledTimes(1)
     })
@@ -114,7 +114,7 @@ describe('UserService', () => {
       }
 
       userRepository.findOne.mockReturnValue(updatedUser)
-      userRepository.update.mockReturnValue(Any)
+      userRepository.update.mockReturnValue(updatedUser)
 
       const returnedUser = await service.update(
         {
@@ -123,7 +123,7 @@ describe('UserService', () => {
           email: 'updated@email.com',
           password: users[0].password,
         },
-        1,
+        { id: 1 },
       )
 
       expect(returnedUser).toStrictEqual(updatedUser)
@@ -132,7 +132,7 @@ describe('UserService', () => {
 
     it('should throw an error when no user found and call findOne', async () => {
       const spy = jest.spyOn(service, 'findOne')
-      spy.mockReset()
+      spy.mockClear()
       const updatedUser = {
         name: 'updatedName',
         surname: 'updatedSurname',
@@ -143,14 +143,14 @@ describe('UserService', () => {
       userRepository.findOne.mockReturnValue(null)
 
       try {
-        returnValue = await service.update(updatedUser, 1)
+        returnValue = await service.update(updatedUser, { id: 2 })
       } catch (e) {
         expect(e).toStrictEqual(
           new NotFoundException('User with given ID not found'),
         )
       }
       expect(spy).toHaveBeenCalledTimes(1)
-      expect(userRepository.update).toHaveBeenCalledTimes(1)
+      expect(userRepository.update).toHaveBeenCalledTimes(0)
       expect(returnValue).toBeUndefined()
     })
   })

@@ -26,7 +26,7 @@ export class UserController {
   @ApiOperation({ description: 'Gets detail of one specific user' })
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<User> {
-    return await this.service.findOne(id)
+    return await this.service.findOne({ id })
   }
 
   @ApiOperation({ description: 'Creates new user' })
@@ -49,6 +49,6 @@ export class UserController {
   @ApiOperation({ description: 'Delete specific user' })
   @Delete(':id')
   async deleteUser(@Param('id') id: number): Promise<void> {
-    return await this.service.delete(id)
+    return await this.service.delete({ id })
   }
 }

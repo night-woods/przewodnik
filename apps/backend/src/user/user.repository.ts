@@ -10,8 +10,16 @@ export class UserRepository {
     return await this.prisma.user.findMany()
   }
 
-  async findOne(id: number) {
-    return await this.prisma.user.findUnique({ where: { id } })
+  async findOne(searchQuery) {
+    return searchQuery.id
+      ? await this.prisma.user.findUnique({
+          where: {
+            id: searchQuery.id,
+          },
+        })
+      : await this.prisma.user.findUnique({
+          where: { email: searchQuery.email },
+        })
   }
 
   async create(data) {

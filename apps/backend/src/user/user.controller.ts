@@ -43,7 +43,7 @@ export class UserController {
     @Param('id') id: number,
     @Body() user: UpdateUserDto,
   ): Promise<User | null> {
-    return await this.service.update(user, id)
+    return await this.service.update(user, { id })
   }
 
   @ApiOperation({ description: 'Delete specific user' })

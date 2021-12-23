@@ -8,8 +8,11 @@ import { UserRepository } from './user.repository'
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async findAll(): Promise<User[]> {
-    return await this.userRepository.findAll()
+  async findAll() {
+    return {
+      // TODO use data in all methods
+      data: await this.userRepository.findAll(),
+    }
   }
 
   async findOne(id: number): Promise<User | null> {

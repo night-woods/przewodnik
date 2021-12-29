@@ -12,32 +12,36 @@ export interface UserQuery {
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async findAll(): Promise<User[]> {
+  async findAll() {
     return await this.userRepository.findAll()
   }
 
-  async findOne(searchQuery: UserQuery): Promise<User | null> {
+  async findOne(searchQuery: UserQuery) {
     const user = await this.userRepository.findOne(searchQuery)
 
     if (!user) {
       throw new NotFoundException('User with given ID not found')
     }
 
-    return user
+    return {
+      data: user,
+    }
   }
 
-  async create(data: CreateUserDto): Promise<User | null> {
-    return await this.userRepository.create(data)
+  async create(data: CreateUserDto) {
+    return {
+      data: await this.userRepository.create(data),
+    }
   }
 
   async update(data: UpdateUserDto, searchQuery: UserQuery) {
     const user = await this.findOne(searchQuery)
-    return await this.userRepository.update(data, user.id)
+    return { data: await this.userRepository.update(data, user.data.id) }
   }
 
-  async delete(searchQuery: UserQuery): Promise<void> {
+  async delete(searchQuery: UserQuery) {
     const user = await this.findOne(searchQuery)
 
-    await this.userRepository.delete(user.id)
+    await this.userRepository.delete(user.data.id)
   }
 }

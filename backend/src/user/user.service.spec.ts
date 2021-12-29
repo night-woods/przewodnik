@@ -1,15 +1,18 @@
 import { NotFoundException } from '@nestjs/common'
-import { Any } from 'typeorm'
+import { createTestingModule } from '../test-utils/create-testing-module'
 import { UserService } from './user.service'
 
+let userRepository
+let sut: UserService
+
+beforeAll(async () => {
+  ;({ userRepository } = await createTestingModule())
+  sut = new UserService(userRepository as any)
+})
 describe('UserService', () => {
-  const userRepository = {
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-  }
+  beforeEach(() => {
+    jest.resetAllMocks()
+  })
   const users = [
     {
       id: 1,
@@ -33,125 +36,152 @@ describe('UserService', () => {
       password: 'test2',
     },
   ]
-  /*eslint-disable*/
-  const service = new UserService(userRepository as any)
-  beforeEach(async () => {
-    userRepository.findAll.mockReset()
-    userRepository.findOne.mockReset()
-    userRepository.update.mockReset()
-  })
-
-  it('should be defined', () => {
-    expect(service).toBeDefined()
-  })
 
   describe('findAll', () => {
     it('should return users', async () => {
-      userRepository.findAll.mockReturnValue(users)
-      const returnedUsers = await service.findAll()
+      userRepository.findAll.mockResolvedValueOnce(users)
+      const returnedUsers = await sut.findAll()
 
-      expect(returnedUsers).toBe(users)
-    })
-
-    it('should return empty array, when no users provided', async () => {
-      userRepository.findAll.mockReturnValue([])
-      const returnedUsers = await service.findAll()
-
-      expect(returnedUsers.length).toBe(0)
+      expect(returnedUsers).toEqual({ data: users })
     })
 
     it('should call findAll once', async () => {
-      userRepository.findAll.mockReturnValue(Any)
-      await service.findAll()
+      userRepository.findAll.mockResolvedValueOnce(users)
+      await sut.findAll()
 
       expect(userRepository.findAll).toBeCalledTimes(1)
     })
   })
 
   describe('findOne', () => {
-    it('should return user when he exists', async () => {
-      userRepository.findOne.mockReturnValue(users[0])
+    it('should return user when they exist', async () => {
+      userRepository.findOne.mockResolvedValueOnce(users[0])
 
-      const returnedUser = await service.findOne({ id: 1 })
+      const returnedUser = await sut.findOne(1)
 
-      expect(returnedUser.id).toStrictEqual(users[0].id)
+      expect(returnedUser).toEqual({ data: users[0] })
     })
 
     it('should throw an error when user not found', async () => {
-      userRepository.findOne.mockReturnValue(null)
-      let returnValue
-      try {
-        returnValue = await service.findOne({ id: 1 })
-      } catch (e) {
-        expect(e).toStrictEqual(
-          new NotFoundException('User with given ID not found'),
-        )
-      }
-      expect(returnValue).toBeUndefined()
+      userRepository.findOne.mockResolvedValueOnce(null)
+
+      await expect(sut.findOne(1)).rejects.toThrow(NotFoundException)
     })
 
     it('should call findOne once', async () => {
-      userRepository.findOne.mockReturnValue(users[0])
+      userRepository.findOne.mockResolvedValueOnce(users[0])
 
-      await service.findOne({ id: 1 })
+      await sut.findOne(1)
 
       expect(userRepository.findOne).toBeCalledTimes(1)
     })
   })
 
   describe('update', () => {
-    const spy = jest.spyOn(service, 'findOne')
-    beforeEach(() => {
-      spy.mockClear()
-    })
-    it('should find and update existing user', async () => {
-      const updatedUser = {
-        id: 1,
-        name: 'updatedName',
-        surname: 'updatedSurname',
-        email: 'updated@email.com',
-        password: users[0].password,
-      }
+    const updatedUser = {
+      id: 1,
+      name: 'updatedName',
+      surname: 'updatedSurname',
+      email: 'updated@email.com',
+      password: users[0].password,
+    }
 
-      userRepository.findOne.mockReturnValue(updatedUser)
-      userRepository.update.mockReturnValue(updatedUser)
+    it('should update user', async () => {
+      userRepository.findOne.mockResolvedValueOnce(updatedUser)
+      userRepository.update.mockResolvedValueOnce(updatedUser)
 
-      const returnedUser = await service.update(
+      await sut.update(
         {
           name: 'updatedName',
           surname: 'updatedSurname',
           email: 'updated@email.com',
           password: users[0].password,
         },
-        { id: 1 },
+        1,
       )
 
-      expect(returnedUser).toStrictEqual(updatedUser)
-      expect(spy).toBeCalledTimes(1)
+      expect(userRepository.update).toHaveBeenCalledTimes(1)
+      expect(userRepository.update).toHaveBeenCalledWith(
+        {
+          name: 'updatedName',
+          surname: 'updatedSurname',
+          email: 'updated@email.com',
+          password: users[0].password,
+        },
+        1,
+      )
     })
 
-    it('should throw an error when no user found and call findOne', async () => {
-      const spy = jest.spyOn(service, 'findOne')
-      spy.mockClear()
-      const updatedUser = {
-        name: 'updatedName',
-        surname: 'updatedSurname',
-        email: 'updated@email.com',
-        password: users[0].password,
-      }
-      let returnValue
-      userRepository.findOne.mockReturnValue(null)
+    it('should return updated user', async () => {
+      userRepository.findOne.mockResolvedValueOnce(updatedUser)
+      userRepository.update.mockResolvedValueOnce(updatedUser)
 
-      try {
-        returnValue = await service.update(updatedUser, { id: 2 })
-      } catch (e) {
-        expect(e).toStrictEqual(
-          new NotFoundException('User with given ID not found'),
-        )
-      }
-      expect(spy).toHaveBeenCalledTimes(1)
+      const returnedUser = await sut.update(
+        {
+          name: 'updatedName',
+          surname: 'updatedSurname',
+          email: 'updated@email.com',
+          password: users[0].password,
+        },
+        1,
+      )
+
+      expect(returnedUser).toEqual({ data: updatedUser })
+    })
+
+    it('should throw an error when no user found', async () => {
+      userRepository.findOne.mockResolvedValueOnce(null)
+
+      await expect(
+        sut.update(
+          {
+            name: 'updatedName',
+            surname: 'updatedSurname',
+            email: 'updated@email.com',
+            password: users[0].password,
+          },
+          1,
+        ),
+      ).rejects.toThrow(NotFoundException)
+
       expect(userRepository.update).toHaveBeenCalledTimes(0)
-      expect(returnValue).toBeUndefined()
+    })
+  })
+
+  describe('create', () => {
+    const userToCreate = {
+      name: 'test',
+      surname: 'test',
+      email: 'test@gmail.com',
+      password: 'test',
+    }
+    it('should call create user', async () => {
+      userRepository.create.mockResolvedValueOnce(users[0])
+
+      await sut.create(userToCreate)
+
+      expect(userRepository.create).toBeCalledTimes(1)
+      expect(userRepository.create).toBeCalledWith(userToCreate)
+    })
+
+    it('should return created user', async () => {
+      userRepository.create.mockResolvedValueOnce(users[0])
+
+      const response = await sut.create(userToCreate)
+
+      expect(response).toEqual({ data: users[0] })
+    })
+  })
+
+  describe('delete', () => {
+    it('should call delete user', async () => {
+      userRepository.delete.mockResolvedValueOnce(null)
+      userRepository.findOne.mockResolvedValueOnce(users[0])
+
+      await sut.delete(1)
+
+      expect(userRepository.delete).toBeCalledTimes(1)
+      expect(userRepository.findOne).toBeCalledTimes(1)
     })
   })
 })

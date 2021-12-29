@@ -5,9 +5,13 @@ import { AppModule } from './app.module'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+
+  app.useGlobalPipes(new ValidationPipe({ transform: true }))
+
   const apiVersion = 'v1'
   const apiPrefix = `api/${apiVersion}`
-  app.useGlobalPipes(new ValidationPipe({ transform: true }))
+  app.setGlobalPrefix(apiPrefix)
+
   const swaggerOptions = new DocumentBuilder()
     .setTitle('Przewodnik')
     .setDescription('Przewodnik po Wrocławiu')

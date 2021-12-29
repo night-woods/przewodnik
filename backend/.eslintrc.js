@@ -55,7 +55,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.test.ts', '**/test-utils/**'],
+      files: ['*.spec.ts', '*.test.ts', '**/test-utils/**'],
       rules: {
         '@typescript-eslint/no-explicit-any': [0],
         '@typescript-eslint/no-non-null-assertion': [0],

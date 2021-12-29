@@ -1,15 +1,20 @@
 import { NotFoundException } from '@nestjs/common'
+import {
+  createTestingModule,
+} from '../test-utils/create-testing-module'
 import { UserService } from './user.service'
 
-describe('UserService', () => {
-  const userRepository = {
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-  }
+let userRepository
+let sut: UserService
 
+beforeAll(async () => {
+  ;({ userRepository } = await createTestingModule())
+  sut = new UserService(userRepository as any)
+})
+describe('UserService', () => {
+  beforeEach(() => {
+    jest.resetAllMocks()
+  })
   const users = [
     {
       id: 1,
@@ -34,14 +39,6 @@ describe('UserService', () => {
     },
   ]
 
-  const sut = new UserService(userRepository as any)
-
-  beforeEach(async () => {
-    userRepository.findAll.mockReset()
-    userRepository.findOne.mockReset()
-    userRepository.update.mockReset()
-  })
-
   describe('findAll', () => {
     it('should return users', async () => {
       userRepository.findAll.mockResolvedValueOnce(users)
@@ -64,7 +61,7 @@ describe('UserService', () => {
 
       const returnedUser = await sut.findOne(1)
 
-      expect(returnedUser).toEqual(users[0])
+      expect(returnedUser).toEqual({ data: users[0] })
     })
 
     it('should throw an error when user not found', async () => {
@@ -131,7 +128,7 @@ describe('UserService', () => {
         1,
       )
 
-      expect(returnedUser).toEqual(updatedUser)
+      expect(returnedUser).toEqual({ data: updatedUser })
     })
 
     it('should throw an error when no user found', async () => {
@@ -152,5 +149,41 @@ describe('UserService', () => {
       expect(userRepository.update).toHaveBeenCalledTimes(0)
     })
   })
-  // TODO add tests for create and delete
+
+  describe('create', () => {
+    const userToCreate = {
+      name: 'test',
+      surname: 'test',
+      email: 'test@gmail.com',
+      password: 'test',
+    }
+    it('should call create user', async () => {
+      userRepository.create.mockResolvedValueOnce(users[0])
+
+      await sut.create(userToCreate)
+
+      expect(userRepository.create).toBeCalledTimes(1)
+      expect(userRepository.create).toBeCalledWith(userToCreate)
+    })
+
+    it('should return created user', async () => {
+      userRepository.create.mockResolvedValueOnce(users[0])
+
+      const response = await sut.create(userToCreate)
+
+      expect(response).toEqual({ data: users[0] })
+    })
+  })
+
+  describe('delete', () => {
+    it('should call delete user', async () => {
+      userRepository.delete.mockResolvedValueOnce(null)
+      userRepository.findOne.mockResolvedValueOnce(users[0])
+
+      await sut.delete(1)
+
+      expect(userRepository.delete).toBeCalledTimes(1)
+      expect(userRepository.findOne).toBeCalledTimes(1)
+    })
+  })
 })

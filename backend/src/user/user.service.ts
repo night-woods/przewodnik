@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { User } from '@prisma/client'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 
 import { UserRepository } from './user.repository'
@@ -10,33 +9,36 @@ export class UserService {
 
   async findAll() {
     return {
-      // TODO use data in all methods
       data: await this.userRepository.findAll(),
     }
   }
 
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: number) {
     const user = await this.userRepository.findOne(id)
 
     if (!user) {
       throw new NotFoundException('User with given ID not found')
     }
 
-    return user
+    return {
+      data: user,
+    }
   }
 
-  async create(data: CreateUserDto): Promise<User | null> {
-    return await this.userRepository.create(data)
+  async create(data: CreateUserDto) {
+    return {
+      data: await this.userRepository.create(data),
+    }
   }
 
   async update(data: UpdateUserDto, id: number) {
     const user = await this.findOne(id)
-    return await this.userRepository.update(data, user.id)
+    return { data: await this.userRepository.update(data, user.data.id) }
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number) {
     const user = await this.findOne(id)
 
-    await this.userRepository.delete(user.id)
+    await this.userRepository.delete(user.data.id)
   }
 }

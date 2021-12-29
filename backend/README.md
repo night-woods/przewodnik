@@ -35,11 +35,14 @@ $ npm install
 ## Running the app
 
 ```bash
+# running the database
+$ docker-compose up
+
 # development
 $ npm run start
 
 # watch mode
-$ npm run start:dev
+$ npm run dev
 
 # production mode
 $ npm run start:prod

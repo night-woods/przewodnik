@@ -14,7 +14,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<Omit<User, 'password'>> {
-    const user = await this.usersService.findOne({ email })
+    const user = (await this.usersService.findOne({ email })).data
     if (user && user.password === password) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user

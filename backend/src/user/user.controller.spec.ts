@@ -98,7 +98,7 @@ describe('GET /users/:id', () => {
     await request(app.getHttpServer()).get('/users/13')
 
     expect(userService.findOne).toHaveBeenCalledTimes(1)
-    expect(userService.findOne).toHaveBeenCalledWith(13)
+    expect(userService.findOne).toHaveBeenCalledWith({ id: 13 })
   })
 
   it('returns 400 if ID is not a number', async () => {
@@ -117,7 +117,7 @@ describe('DELETE /users/:id', () => {
     await request(app.getHttpServer()).delete('/users/1')
 
     expect(userService.delete).toHaveBeenCalledTimes(1)
-    expect(userService.delete).toHaveBeenCalledWith(1)
+    expect(userService.delete).toHaveBeenCalledWith({ id: 1 })
   })
 
   it('returns 400 if ID is not a number', async () => {
@@ -219,7 +219,7 @@ describe('PATCH /users/:id', () => {
     await request(app.getHttpServer()).patch('/users/1').send(reqUser)
 
     expect(userService.update).toHaveBeenCalledTimes(1)
-    expect(userService.update).toHaveBeenCalledWith(reqUser, 1)
+    expect(userService.update).toHaveBeenCalledWith(reqUser, { id: 1 })
   })
 
   it('returns 400 if ID is not a number', async () => {

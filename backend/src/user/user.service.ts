@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { User } from '@prisma/client'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserRepository } from './user.repository'
 
@@ -13,7 +12,7 @@ export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   async findAll() {
-    return await this.userRepository.findAll()
+    return { data: await this.userRepository.findAll() }
   }
 
   async findOne(searchQuery: UserQuery) {

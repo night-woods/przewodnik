@@ -1,6 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
-import { Logo } from '@przewodnik/ui'
 import { Fragment } from 'react'
 import { classNames } from '../../lib/classNames'
 import { isCurrent, navigation } from './Navigation'
@@ -66,7 +65,7 @@ export const MobileSidebar = ({
           </Transition.Child>
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
-              <Logo />
+              Przewodnik
             </div>
             <nav className="mt-5 px-2 space-y-1">
               {navigation.map((item) => (

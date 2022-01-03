@@ -1,4 +1,3 @@
-/* eslint-disable import/named */
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { User } from '@prisma/client'

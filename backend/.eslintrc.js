@@ -9,7 +9,6 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:import/recommended',
   ],
   root: true,
   env: {
@@ -42,6 +41,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
+    'import/no-extraneous-dependencies':'off',
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -52,6 +52,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-extra-semi': 'off',
     'import/order': [0],
+    '@typescript-eslint/import/named ': 'off'
   },
   overrides: [
     {

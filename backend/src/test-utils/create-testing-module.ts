@@ -4,6 +4,7 @@ import { UserRepository } from '../user/user.repository'
 import { PrismaService } from '../prisma/prisma.service'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/user.service'
+import { JwtService } from '@nestjs/jwt'
 
 type PromiseValue<T> = T extends PromiseLike<infer U> ? U : T
 export type TestingModuleUtilsPromise = ReturnType<typeof createTestingModule>
@@ -12,9 +13,14 @@ export type TestingModuleUtil<K extends keyof TestingModuleUtils> =
   TestingModuleUtils[K]
 
 export const createTestingModule = async () => {
+  const jwtService = {
+    sign: jest.fn(),
+  }
+
   const userService = {
     findAll: jest.fn(),
-    findOne: jest.fn(),
+    findById: jest.fn(),
+    findByEmail: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
@@ -22,7 +28,8 @@ export const createTestingModule = async () => {
 
   const userRepository = {
     findAll: jest.fn(),
-    findOne: jest.fn(),
+    findById: jest.fn(),
+    findByEmail: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -51,6 +58,8 @@ export const createTestingModule = async () => {
     .useValue(prismaService)
     .overrideProvider(UserRepository)
     .useValue(userRepository)
+    .overrideProvider(JwtService)
+    .useValue(jwtService)
     .compile()
 
   const app = module.createNestApplication()
@@ -63,5 +72,6 @@ export const createTestingModule = async () => {
     userService,
     userRepository,
     prismaService,
+    jwtService,
   }
 }

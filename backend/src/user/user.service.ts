@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserRepository } from './user.repository'
-
-export interface UserQuery {
-  id?: number
-  email?: string
-}
+import { hash } from 'bcrypt'
 
 @Injectable()
 export class UserService {
@@ -15,8 +11,20 @@ export class UserService {
     return { data: await this.userRepository.findAll() }
   }
 
-  async findOne(searchQuery: UserQuery) {
-    const user = await this.userRepository.findOne(searchQuery)
+  async findByEmail(email: string) {
+    const user = await this.userRepository.findByEmail(email)
+
+    if (!user) {
+      throw new NotFoundException('User with given email not found')
+    }
+
+    return {
+      data: user,
+    }
+  }
+
+  async findById(id: number) {
+    const user = await this.userRepository.findById(id)
 
     if (!user) {
       throw new NotFoundException('User with given ID not found')
@@ -28,18 +36,19 @@ export class UserService {
   }
 
   async create(data: CreateUserDto) {
+    data.password = await hash(data.password, 10)
     return {
       data: await this.userRepository.create(data),
     }
   }
 
-  async update(data: UpdateUserDto, searchQuery: UserQuery) {
-    const user = await this.findOne(searchQuery)
+  async update(data: UpdateUserDto, id: number) {
+    const user = await this.findById(id)
     return { data: await this.userRepository.update(data, user.data.id) }
   }
 
-  async delete(searchQuery: UserQuery) {
-    const user = await this.findOne(searchQuery)
+  async delete(id: number) {
+    const user = await this.findById(id)
 
     await this.userRepository.delete(user.data.id)
   }

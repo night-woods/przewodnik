@@ -7,8 +7,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { RequestUser } from '../auth/user.decorator'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserService } from './user.service'
 
@@ -24,7 +27,15 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne({ id })
+    return this.service.findById(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user profile' })
+  @Get('/me')
+  async getProfile(@RequestUser() user) {
+    return user
   }
 
   @Post()
@@ -39,11 +50,11 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() user: UpdateUserDto,
   ) {
-    return this.service.update(user, { id })
+    return this.service.update(user, id)
   }
 
   @Delete(':id')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.service.delete({ id })
+    return this.service.delete(id)
   }
 }

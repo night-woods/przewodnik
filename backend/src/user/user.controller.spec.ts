@@ -1,4 +1,4 @@
-import { INestApplication, NotFoundException } from '@nestjs/common'
+import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import {
   createTestingModule,
@@ -79,13 +79,13 @@ describe('GET /users/:id', () => {
   }
 
   it('returns 200', async () => {
-    userService.findOne.mockResolvedValueOnce(user)
+    userService.findById.mockResolvedValueOnce(user)
 
     await request(app.getHttpServer()).get('/users/1').expect(200)
   })
 
   it('returns user from UserService', async () => {
-    userService.findOne.mockResolvedValueOnce(user)
+    userService.findById.mockResolvedValueOnce(user)
 
     const response = await request(app.getHttpServer()).get('/users/1')
 
@@ -93,16 +93,16 @@ describe('GET /users/:id', () => {
   })
 
   it('calls UserService', async () => {
-    userService.findOne.mockResolvedValueOnce(user)
+    userService.findById.mockResolvedValueOnce(user)
 
     await request(app.getHttpServer()).get('/users/13')
 
-    expect(userService.findOne).toHaveBeenCalledTimes(1)
-    expect(userService.findOne).toHaveBeenCalledWith({ id: 13 })
+    expect(userService.findById).toHaveBeenCalledTimes(1)
+    expect(userService.findById).toHaveBeenCalledWith(13)
   })
 
   it('returns 400 if ID is not a number', async () => {
-    userService.findOne.mockResolvedValueOnce(user)
+    userService.findById.mockResolvedValueOnce(user)
 
     await request(app.getHttpServer()).get('/users/thirteen').expect(400)
   })
@@ -117,7 +117,7 @@ describe('DELETE /users/:id', () => {
     await request(app.getHttpServer()).delete('/users/1')
 
     expect(userService.delete).toHaveBeenCalledTimes(1)
-    expect(userService.delete).toHaveBeenCalledWith({ id: 1 })
+    expect(userService.delete).toHaveBeenCalledWith(1)
   })
 
   it('returns 400 if ID is not a number', async () => {
@@ -219,7 +219,7 @@ describe('PATCH /users/:id', () => {
     await request(app.getHttpServer()).patch('/users/1').send(reqUser)
 
     expect(userService.update).toHaveBeenCalledTimes(1)
-    expect(userService.update).toHaveBeenCalledWith(reqUser, { id: 1 })
+    expect(userService.update).toHaveBeenCalledWith(reqUser, 1)
   })
 
   it('returns 400 if ID is not a number', async () => {

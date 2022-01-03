@@ -53,27 +53,27 @@ describe('UserService', () => {
     })
   })
 
-  describe('findOne', () => {
+  describe('findById', () => {
     it('should return user when they exist', async () => {
-      userRepository.findOne.mockResolvedValueOnce(users[0])
+      userRepository.findById.mockResolvedValueOnce(users[0])
 
-      const returnedUser = await sut.findOne({ id: 1 })
+      const returnedUser = await sut.findById(1)
 
       expect(returnedUser).toEqual({ data: users[0] })
     })
 
     it('should throw an error when user not found', async () => {
-      userRepository.findOne.mockResolvedValueOnce(null)
+      userRepository.findById.mockResolvedValueOnce(null)
 
-      await expect(sut.findOne({ id: 1 })).rejects.toThrow(NotFoundException)
+      await expect(sut.findById(1)).rejects.toThrow(NotFoundException)
     })
 
-    it('should call findOne once', async () => {
-      userRepository.findOne.mockResolvedValueOnce(users[0])
+    it('should call findById once', async () => {
+      userRepository.findById.mockResolvedValueOnce(users[0])
 
-      await sut.findOne({ id: 1 })
+      await sut.findById(1)
 
-      expect(userRepository.findOne).toBeCalledTimes(1)
+      expect(userRepository.findById).toBeCalledTimes(1)
     })
   })
 
@@ -87,7 +87,7 @@ describe('UserService', () => {
     }
 
     it('should update user', async () => {
-      userRepository.findOne.mockResolvedValueOnce(updatedUser)
+      userRepository.findById.mockResolvedValueOnce(updatedUser)
       userRepository.update.mockResolvedValueOnce(updatedUser)
 
       await sut.update(
@@ -97,7 +97,7 @@ describe('UserService', () => {
           email: 'updated@email.com',
           password: users[0].password,
         },
-        { id: 1 },
+        1,
       )
 
       expect(userRepository.update).toHaveBeenCalledTimes(1)
@@ -113,7 +113,7 @@ describe('UserService', () => {
     })
 
     it('should return updated user', async () => {
-      userRepository.findOne.mockResolvedValueOnce(updatedUser)
+      userRepository.findById.mockResolvedValueOnce(updatedUser)
       userRepository.update.mockResolvedValueOnce(updatedUser)
 
       const returnedUser = await sut.update(
@@ -123,14 +123,14 @@ describe('UserService', () => {
           email: 'updated@email.com',
           password: users[0].password,
         },
-        { id: 1 },
+        1,
       )
 
       expect(returnedUser).toEqual({ data: updatedUser })
     })
 
     it('should throw an error when no user found', async () => {
-      userRepository.findOne.mockResolvedValueOnce(null)
+      userRepository.findById.mockResolvedValueOnce(null)
 
       await expect(
         sut.update(
@@ -140,7 +140,7 @@ describe('UserService', () => {
             email: 'updated@email.com',
             password: users[0].password,
           },
-          { id: 1 },
+          1,
         ),
       ).rejects.toThrow(NotFoundException)
 
@@ -176,12 +176,12 @@ describe('UserService', () => {
   describe('delete', () => {
     it('should call delete user', async () => {
       userRepository.delete.mockResolvedValueOnce(null)
-      userRepository.findOne.mockResolvedValueOnce(users[0])
+      userRepository.findById.mockResolvedValueOnce(users[0])
 
-      await sut.delete({ id: 1 })
+      await sut.delete(1)
 
       expect(userRepository.delete).toBeCalledTimes(1)
-      expect(userRepository.findOne).toBeCalledTimes(1)
+      expect(userRepository.findById).toBeCalledTimes(1)
     })
   })
 })

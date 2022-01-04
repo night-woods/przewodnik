@@ -11,9 +11,16 @@ datasource db {
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  firstName String
-  lastName  String
-  email     String @unique
-  password  String
+  id       Int    @id @default(autoincrement())
+  name     String
+  surname  String
+  email    String @unique
+  password String
+  roles    Role[]
+}
+
+enum Role {
+  ADMIN
+  LOCATION_ADMIN
+  LOCATION_USER
 }

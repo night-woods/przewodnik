@@ -12,6 +12,8 @@ import {
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { RequestUser } from '../auth/user.decorator'
+import { Role } from 'src/auth/role.enum'
+import { Roles } from 'src/auth/roles.decorator'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserService } from './user.service'
 
@@ -39,6 +41,7 @@ export class UserController {
   }
 
   @Post()
+  @Roles(Role.Admin)
   @ApiBody({ type: CreateUserDto })
   createUser(@Body() user: CreateUserDto) {
     return this.service.create(user)

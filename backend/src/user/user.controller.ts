@@ -10,13 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { HasRoles } from 'src/auth/roles.decorator'
+import { RolesGuard } from 'src/auth/roles.guard'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { RequestUser } from '../auth/user.decorator'
-import { Role } from 'src/auth/role.enum'
-import { Roles } from 'src/auth/roles.decorator'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserService } from './user.service'
 
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @ApiTags('users')
 @Controller('users')
 export class UserController {
@@ -32,16 +34,14 @@ export class UserController {
     return this.service.findById(id)
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile' })
   @Get('/me')
   async getProfile(@RequestUser() user) {
     return user
   }
-
+  @UseGuards(RolesGuard)
+  @HasRoles('ADMIN')
   @Post()
-  @Roles(Role.Admin)
   @ApiBody({ type: CreateUserDto })
   createUser(@Body() user: CreateUserDto) {
     return this.service.create(user)

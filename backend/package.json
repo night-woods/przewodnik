@@ -20,7 +20,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:migrate:dev": "dotenv -e .example.env -- npx prisma migrate dev",
-    "db:generate:dev": "dotenv -e .example.env -- npx prisma migrate dev --name"
+    "db:generate:dev": "dotenv -e .example.env -- npx prisma migrate dev --name",
+    "db:seed": "dotenv -e .example.env -- ts-node -r tsconfig-paths/register ./scripts/development-seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^8.2.4",

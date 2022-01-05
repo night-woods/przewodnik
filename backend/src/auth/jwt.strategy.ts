@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
+import { UserService } from 'src/user/user.service'
 
 interface ValidatePayload {
   email: string
@@ -10,7 +11,7 @@ interface ValidatePayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly usersService: UserService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -20,6 +21,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async validate(payload: ValidatePayload) {
-    return payload
+    const user = await this.usersService.findByEmail(payload.email)
+    return {
+      ...payload,
+      role: user.data.role,
+    }
   }
 }

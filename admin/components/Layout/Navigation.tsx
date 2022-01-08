@@ -6,7 +6,6 @@ import {
   UsersIcon,
 } from '@heroicons/react/outline'
 import useTranslation from 'next-translate/useTranslation'
-import { useRouter } from 'next/router'
 import { SVGProps } from 'react'
 interface navigation {
   title: string

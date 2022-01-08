@@ -2,6 +2,7 @@ import axios from 'axios'
 import type { InferGetServerSidePropsType } from 'next'
 import Head from 'next/head'
 import Layout from '../components/Layout/Layout'
+import useTranslation from 'next-translate/useTranslation'
 
 interface ApiResponse<T> {
   data: T
@@ -27,17 +28,21 @@ export const getServerSideProps = async () => {
 const Home = ({
   data: users,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const { t } = useTranslation()
+
   return (
     <>
       <Head>
-        <title>Użytkownicy | Przewodnik</title>
+        <title>
+          {t('users:usersTitle')} | {t('global:webpageTitle')}
+        </title>
         <meta
           name="description"
           content="Aplikacja do zarządzania przewodnikiem"
         />
       </Head>
 
-      <Layout title="Użytkownicy">
+      <Layout title={t('users:usersTitle')}>
         <div className="flex flex-col">
           <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -49,19 +54,19 @@ const Home = ({
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Imię
+                        {t('users:userFirstName')}
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Nazwisko
+                        {t('users:userLastName')}
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Email
+                        {t('users:userEmail')}
                       </th>
                       <th scope="col" className="relative px-6 py-3">
                         <span className="sr-only">Edit</span>

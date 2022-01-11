@@ -1,13 +1,13 @@
 module.exports = {
-  extends: ["next", "prettier"],
+  extends: ['next', 'plugin:react-hooks/recommended'],
   settings: {
     next: {
       rootDir: [
-        "apps/admin/",
-        "packages/ui/",
-        "packages/config/",
-        "packages/tsconfig/",
+        'apps/admin/',
+        'packages/ui/',
+        'packages/config/',
+        'packages/tsconfig/',
       ],
     },
   },
-};
+}

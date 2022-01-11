@@ -13,7 +13,7 @@ interface navigation {
   icon: (props: SVGProps<SVGSVGElement>) => JSX.Element
 }
 
-export const navigations = () => {
+export const useNavigation = () => {
   const { t } = useTranslation()
 
   return [

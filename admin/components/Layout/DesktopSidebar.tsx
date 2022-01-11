@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { classNames } from '../../lib/classNames'
-import { isCurrent, navigations } from './Navigation'
+import { isCurrent, useNavigation } from './Navigation'
 import { UserProfileButton } from './UserProfileButton'
 import useTranslation from 'next-translate/useTranslation'
 import Link from 'next/link'
@@ -20,7 +20,7 @@ export const DesktopSidebar = ({ currentTitle }: DesktopSidebarProps) => {
             {t('global:webpageTitle')}
           </div>
           <nav className="mt-5 flex-1 px-2 space-y-1">
-            {navigations().map((item) => (
+            {useNavigation().map((item) => (
               <Link key={item.title} href={item.href}>
                 <a
                   className={classNames(

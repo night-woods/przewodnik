@@ -4,7 +4,7 @@ import useTranslation from 'next-translate/useTranslation'
 import Link from 'next/link'
 import { Fragment } from 'react'
 import { classNames } from '../../lib/classNames'
-import { isCurrent, navigations } from './Navigation'
+import { isCurrent, useNavigation } from './Navigation'
 import { UserProfileButton } from './UserProfileButton'
 
 export interface MobileSidebarProps {
@@ -73,7 +73,7 @@ export const MobileSidebar = ({
                 {t('global:webpageTitle')}
               </div>
               <nav className="mt-5 px-2 space-y-1">
-                {navigations().map((item) => (
+                {useNavigation().map((item) => (
                   <Link key={item.title} href={item.href}>
                     <a
                       className={classNames(

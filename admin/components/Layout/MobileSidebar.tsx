@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { XIcon } from '@heroicons/react/outline'
 import useTranslation from 'next-translate/useTranslation'
+import Link from 'next/link'
 import { Fragment } from 'react'
 import { classNames } from '../../lib/classNames'
 import { isCurrent, navigations } from './Navigation'
@@ -73,27 +74,27 @@ export const MobileSidebar = ({
               </div>
               <nav className="mt-5 px-2 space-y-1">
                 {navigations().map((item) => (
-                  <a
-                    key={item.title}
-                    href={item.href}
-                    className={classNames(
-                      isCurrent(item, currentTitle)
-                        ? 'bg-gray-900 text-white'
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                      'group flex items-center px-2 py-2 text-base font-medium rounded-md',
-                    )}
-                  >
-                    <item.icon
+                  <Link key={item.title} href={item.href}>
+                    <a
                       className={classNames(
                         isCurrent(item, currentTitle)
-                          ? 'text-gray-300'
-                          : 'text-gray-400 group-hover:text-gray-300',
-                        'mr-4 flex-shrink-0 h-6 w-6',
+                          ? 'bg-gray-900 text-white'
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                        'group flex items-center px-2 py-2 text-base font-medium rounded-md',
                       )}
-                      aria-hidden="true"
-                    />
-                    {item.title}
-                  </a>
+                    >
+                      <item.icon
+                        className={classNames(
+                          isCurrent(item, currentTitle)
+                            ? 'text-gray-300'
+                            : 'text-gray-400 group-hover:text-gray-300',
+                          'mr-4 flex-shrink-0 h-6 w-6',
+                        )}
+                        aria-hidden="true"
+                      />
+                      {item.title}
+                    </a>
+                  </Link>
                 ))}
               </nav>
             </div>

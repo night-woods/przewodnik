@@ -6,7 +6,6 @@ import {
   Injectable,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { Observable } from 'rxjs'
 import { UserService } from '../user/user.service'
 
 @Injectable()
@@ -17,17 +16,14 @@ export class RolesGuard implements CanActivate {
     private userService: UserService,
   ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext) {
     const roles = this.reflector.get<string[]>('roles', context.getHandler())
     if (!roles) {
       return true
     }
 
-    const request = context.switchToHttp().getRequest()
-    const user = request.user
+    const { user } = context.switchToHttp().getRequest()
 
-    return roles.includes(user.role)
+    return user && roles.includes(user.role)
   }
 }

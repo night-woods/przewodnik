@@ -18,6 +18,13 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
   password: string
+
+  @ApiProperty()
+  @IsNotEmpty()
+  role: string
+
+  @ApiProperty()
+  locationId: number
 }
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}

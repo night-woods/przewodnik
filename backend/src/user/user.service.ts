@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserRepository } from './user.repository'
 import { hash } from 'bcrypt'
+import { Role, User } from '@prisma/client'
 
 @Injectable()
 export class UserService {
@@ -23,33 +28,66 @@ export class UserService {
     }
   }
 
-  async findById(id: number) {
-    const user = await this.userRepository.findById(id)
-
-    if (!user) {
+  async findById(id: number, user?: User) {
+    const foundedUser = await this.userRepository.findById(id)
+    user = await (await this.findByEmail(user.email)).data
+    if (!foundedUser) {
       throw new NotFoundException('User with given ID not found')
+    } else if (
+      user.role == Role.LOCATION_ADMIN &&
+      user.locationId !== foundedUser.locationId
+    ) {
+      throw new ForbiddenException(
+        'User with given ID is not in your location!',
+      )
     }
 
     return {
-      data: user,
+      data: foundedUser,
     }
   }
 
-  async create(data: CreateUserDto) {
+  async create(data: CreateUserDto, user?: User) {
     data.password = await hash(data.password, 10)
+    if (user.role == Role.LOCATION_ADMIN && data.role != Role.LOCATION_USER) {
+      throw new ForbiddenException('You cannot create other admins')
+    } else if (user.role == Role.LOCATION_ADMIN) {
+      data.locationId = await (
+        await this.findByEmail(user.email)
+      ).data.locationId
+    }
     return {
       data: await this.userRepository.create(data),
     }
   }
 
-  async update(data: UpdateUserDto, id: number) {
-    const user = await this.findById(id)
-    return { data: await this.userRepository.update(data, user.data.id) }
+  async update(data: UpdateUserDto, id: number, user?: User) {
+    const foundedUser = await this.findById(id, user)
+    if (
+      user.role == Role.LOCATION_ADMIN &&
+      foundedUser.data.role != Role.LOCATION_USER
+    ) {
+      throw new ForbiddenException('You cannot update other admins')
+    } else if (
+      user.role == Role.LOCATION_ADMIN &&
+      data.locationId &&
+      foundedUser.data?.locationId != data.locationId
+    ) {
+      throw new ForbiddenException('You cannot change locationId of this user!')
+    }
+    return { data: await this.userRepository.update(data, foundedUser.data.id) }
   }
 
-  async delete(id: number) {
-    const user = await this.findById(id)
+  async delete(id: number, user?: User) {
+    const foundedUser = await this.findById(id, user)
 
-    await this.userRepository.delete(user.data.id)
+    if (
+      user.role == Role.LOCATION_ADMIN &&
+      foundedUser.data.role != Role.LOCATION_USER
+    ) {
+      throw new ForbiddenException('You cannot delete other admins')
+    }
+
+    await this.userRepository.delete(foundedUser.data.id)
   }
 }

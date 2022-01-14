@@ -3,20 +3,12 @@ import { UserService } from './user.service'
 import { UserController } from './user.controller'
 import { UserRepository } from './user.repository'
 import { PrismaService } from '../prisma/prisma.service'
-import { APP_GUARD } from '@nestjs/core'
-import { RolesGuard } from 'src/auth/roles.guard'
+import { AuthModule } from 'src/auth/auth.module'
 
 @Module({
+  imports: [AuthModule],
   exports: [UserModule, UserService],
-  providers: [
-    UserService,
-    UserRepository,
-    PrismaService,
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-  ],
+  providers: [UserService, UserRepository, PrismaService],
   controllers: [UserController],
 })
 export class UserModule {}

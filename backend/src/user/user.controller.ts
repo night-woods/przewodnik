@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { Role } from '@prisma/client'
 import { HasRoles } from 'src/auth/roles.decorator'
 import { RolesGuard } from 'src/auth/roles.guard'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
@@ -24,14 +25,18 @@ import { UserService } from './user.service'
 export class UserController {
   constructor(private readonly service: UserService) {}
 
+  @HasRoles(Role.ADMIN)
+  @UseGuards(RolesGuard)
   @Get()
   findAll() {
     return this.service.findAll()
   }
 
+  @HasRoles(Role.ADMIN, Role.LOCATION_ADMIN)
+  @UseGuards(RolesGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findById(id)
+  findOne(@Param('id', ParseIntPipe) id: number, @RequestUser() user) {
+    return this.service.findById(id, user)
   }
 
   @ApiOperation({ summary: 'Get user profile' })
@@ -39,25 +44,31 @@ export class UserController {
   async getProfile(@RequestUser() user) {
     return user
   }
+
   @UseGuards(RolesGuard)
-  @HasRoles('ADMIN')
+  @HasRoles(Role.ADMIN, Role.LOCATION_ADMIN)
   @Post()
   @ApiBody({ type: CreateUserDto })
-  createUser(@Body() user: CreateUserDto) {
-    return this.service.create(user)
+  createUser(@Body() data: CreateUserDto, @RequestUser() user) {
+    return this.service.create(data, user)
   }
 
+  @UseGuards(RolesGuard)
+  @HasRoles(Role.ADMIN, Role.LOCATION_ADMIN)
   @Patch(':id')
   @ApiBody({ type: UpdateUserDto })
   updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() user: UpdateUserDto,
+    @Body() data: UpdateUserDto,
+    @RequestUser() user,
   ) {
-    return this.service.update(user, id)
+    return this.service.update(data, id, user)
   }
 
+  @UseGuards(RolesGuard)
+  @HasRoles(Role.ADMIN, Role.LOCATION_ADMIN)
   @Delete(':id')
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.service.delete(id)
+  deleteUser(@Param('id', ParseIntPipe) id: number, @RequestUser() user) {
+    return this.service.delete(id, user)
   }
 }

@@ -16,4 +16,21 @@ model User {
   surname  String
   email    String @unique
   password String
+  locationId Int?
+  location Location? @relation(fields: [locationId], references: [id])
+
+}
+
+model Location{
+  id Int @id @default(autoincrement())
+  name String
+  street String
+  buildingNumber Int
+  flatNumber Int
+  postcode String
+  city String
+  User User[]
+  isActive Boolean
+  longitude String
+  latitude String
 }

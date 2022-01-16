@@ -12,6 +12,8 @@ async function bootstrap() {
   const apiPrefix = `api/${apiVersion}`
   app.setGlobalPrefix(apiPrefix)
 
+  app.enableCors();
+
   const swaggerOptions = new DocumentBuilder()
     .setTitle('Przewodnik')
     .setDescription('Przewodnik po Wrocławiu')

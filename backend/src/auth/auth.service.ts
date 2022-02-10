@@ -15,7 +15,7 @@ export class AuthService {
     email: string,
     pass: string,
   ): Promise<Omit<User, 'password'>> {
-    const user = await (await this.usersService.findByEmail(email))?.data
+    const user = (await this.usersService.findByEmail(email))?.data
     if (user) {
       const isMatch = await compare(pass, user.password)
       if (isMatch) {

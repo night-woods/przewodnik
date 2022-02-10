@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common'
 import { createTestingModule } from '../test-utils/create-testing-module'
 import { UserService } from './user.service'
+import { Role } from '@prisma/client'
 
 let userRepository
 let sut: UserService
@@ -20,6 +21,7 @@ describe('UserService', () => {
       surname: 'test',
       email: 'test@gmail.com',
       password: 'test',
+      role: Role.LOCATION_USER,
     },
     {
       id: 2,
@@ -27,6 +29,7 @@ describe('UserService', () => {
       surname: 'test1',
       email: 'test1@gmail.com',
       password: 'test1',
+      role: Role.LOCATION_USER,
     },
     {
       id: 3,
@@ -34,6 +37,7 @@ describe('UserService', () => {
       surname: 'test2',
       email: 'test2@gmail.com',
       password: 'test2',
+      role: Role.LOCATION_USER,
     },
   ]
 
@@ -92,8 +96,8 @@ describe('UserService', () => {
 
       await sut.update(
         {
-          name: 'updatedName',
-          surname: 'updatedSurname',
+          firstName: 'updatedName',
+          lastName: 'updatedSurname',
           email: 'updated@email.com',
           password: users[0].password,
         },
@@ -103,8 +107,8 @@ describe('UserService', () => {
       expect(userRepository.update).toHaveBeenCalledTimes(1)
       expect(userRepository.update).toHaveBeenCalledWith(
         {
-          name: 'updatedName',
-          surname: 'updatedSurname',
+          firstName: 'updatedName',
+          lastName: 'updatedSurname',
           email: 'updated@email.com',
           password: users[0].password,
         },
@@ -118,8 +122,8 @@ describe('UserService', () => {
 
       const returnedUser = await sut.update(
         {
-          name: 'updatedName',
-          surname: 'updatedSurname',
+          firstName: 'updatedName',
+          lastName: 'updatedSurname',
           email: 'updated@email.com',
           password: users[0].password,
         },
@@ -135,8 +139,8 @@ describe('UserService', () => {
       await expect(
         sut.update(
           {
-            name: 'updatedName',
-            surname: 'updatedSurname',
+            firstName: 'updatedName',
+            lastName: 'updatedSurname',
             email: 'updated@email.com',
             password: users[0].password,
           },
@@ -150,10 +154,12 @@ describe('UserService', () => {
 
   describe('create', () => {
     const userToCreate = {
-      name: 'test',
-      surname: 'test',
+      firstName: 'test',
+      lastName: 'test',
       email: 'test@gmail.com',
       password: 'test',
+      role: Role.LOCATION_USER,
+      locationId: 1,
     }
     it('should call create user', async () => {
       userRepository.create.mockResolvedValueOnce(users[0])

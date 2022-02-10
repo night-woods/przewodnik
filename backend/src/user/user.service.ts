@@ -29,13 +29,14 @@ export class UserService {
   }
 
   async findById(id: number, user?: User) {
-    const foundedUser = await this.userRepository.findById(id)
-    user = await (await this.findByEmail(user.email)).data
-    if (!foundedUser) {
+    const foundUser = await this.userRepository.findById(id)
+    if (user) user = (await this.findByEmail(user.email)).data
+    if (!foundUser) {
       throw new NotFoundException('User with given ID not found')
     } else if (
+      user &&
       user.role == Role.LOCATION_ADMIN &&
-      user.locationId !== foundedUser.locationId
+      user.locationId !== foundUser.locationId
     ) {
       throw new ForbiddenException(
         'User with given ID is not in your location!',
@@ -43,15 +44,19 @@ export class UserService {
     }
 
     return {
-      data: foundedUser,
+      data: foundUser,
     }
   }
 
   async create(data: CreateUserDto, user?: User) {
     data.password = await hash(data.password, 10)
-    if (user.role == Role.LOCATION_ADMIN && data.role != Role.LOCATION_USER) {
+    if (
+      user &&
+      user.role === String(Role.LOCATION_ADMIN) &&
+      data.role !== String(Role.LOCATION_USER)
+    ) {
       throw new ForbiddenException('You cannot create other admins')
-    } else if (user.role == Role.LOCATION_ADMIN) {
+    } else if (user && user.role == Role.LOCATION_ADMIN) {
       data.locationId = await (
         await this.findByEmail(user.email)
       ).data.locationId
@@ -64,11 +69,13 @@ export class UserService {
   async update(data: UpdateUserDto, id: number, user?: User) {
     const foundedUser = await this.findById(id, user)
     if (
+      user &&
       user.role == Role.LOCATION_ADMIN &&
       foundedUser.data.role != Role.LOCATION_USER
     ) {
       throw new ForbiddenException('You cannot update other admins')
     } else if (
+      user &&
       user.role == Role.LOCATION_ADMIN &&
       data.locationId &&
       foundedUser.data?.locationId != data.locationId
@@ -82,6 +89,7 @@ export class UserService {
     const foundedUser = await this.findById(id, user)
 
     if (
+      user &&
       user.role == Role.LOCATION_ADMIN &&
       foundedUser.data.role != Role.LOCATION_USER
     ) {

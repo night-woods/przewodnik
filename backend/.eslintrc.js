@@ -52,7 +52,6 @@ module.exports = {
     ],
     '@typescript-eslint/no-extra-semi': 'off',
     'import/order': [0],
-    '@typescript-eslint/import/named ': 'off'
   },
   overrides: [
     {

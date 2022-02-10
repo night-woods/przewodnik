@@ -7,9 +7,15 @@ import {
 
 let app: INestApplication
 let userService: TestingModuleUtil<'userService'>
+let authService: TestingModuleUtil<'authService'>
+const authUser = {
+  id: 1,
+  email: 'email@email.com',
+  role: 'ADMIN',
+}
 
 beforeAll(async () => {
-  ;({ app, userService } = await createTestingModule())
+  ;({ app, userService, authService } = await createTestingModule())
   await app.init()
 })
 
@@ -22,24 +28,27 @@ describe('GET /users', () => {
     data: [
       {
         id: 1,
-        name: 'test',
-        surname: 'test',
+        firstName: 'test',
+        lastName: 'test',
         email: 'test@gmail.com',
         password: 'test',
+        role: 'LOCATION_USER',
       },
       {
         id: 2,
-        name: 'test1',
-        surname: 'test1',
+        firstName: 'test1',
+        lastName: 'test1',
         email: 'test1@gmail.com',
         password: 'test1',
+        role: 'LOCATION_USER',
       },
       {
         id: 3,
-        name: 'test2',
-        surname: 'test2',
+        firstName: 'test2',
+        lastName: 'test2',
         email: 'test2@gmail.com',
         password: 'test2',
+        role: 'LOCATION_USER',
       },
     ],
   }
@@ -51,6 +60,8 @@ describe('GET /users', () => {
   })
 
   it('returns users from UserService', async () => {
+    authService.validateUser.mockResolvedValueOnce(users[0])
+    authService.login.mockResolvedValueOnce({ access_token: 'token' })
     userService.findAll.mockResolvedValueOnce(users)
 
     const response = await request(app.getHttpServer()).get('/users')
@@ -59,6 +70,8 @@ describe('GET /users', () => {
   })
 
   it('calls UserService', async () => {
+    authService.validateUser.mockResolvedValueOnce(users[0])
+    authService.login.mockResolvedValueOnce({ access_token: 'token' })
     userService.findAll.mockResolvedValueOnce(users)
 
     await request(app.getHttpServer()).get('/users')
@@ -71,8 +84,8 @@ describe('GET /users/:id', () => {
   const user = {
     data: {
       id: 1,
-      name: 'test',
-      surname: 'test',
+      firstName: 'test',
+      lastName: 'test',
       email: 'test@gmail.com',
       password: 'test',
     },
@@ -98,7 +111,7 @@ describe('GET /users/:id', () => {
     await request(app.getHttpServer()).get('/users/13')
 
     expect(userService.findById).toHaveBeenCalledTimes(1)
-    expect(userService.findById).toHaveBeenCalledWith(13)
+    expect(userService.findById).toHaveBeenCalledWith(13, authUser)
   })
 
   it('returns 400 if ID is not a number', async () => {
@@ -117,7 +130,7 @@ describe('DELETE /users/:id', () => {
     await request(app.getHttpServer()).delete('/users/1')
 
     expect(userService.delete).toHaveBeenCalledTimes(1)
-    expect(userService.delete).toHaveBeenCalledWith(1)
+    expect(userService.delete).toHaveBeenCalledWith(1, authUser)
   })
 
   it('returns 400 if ID is not a number', async () => {
@@ -127,18 +140,20 @@ describe('DELETE /users/:id', () => {
 
 describe('POST /users', () => {
   const reqUser = {
-    name: 'test',
-    surname: 'test',
+    firstName: 'test',
+    lastName: 'test',
     email: 'test@gmail.com',
     password: 'test',
+    role: 'LOCATION_USER',
   }
   const resUser = {
     data: {
       id: 1,
-      name: 'test',
-      surname: 'test',
+      firstName: 'test',
+      lastName: 'test',
       email: 'test@gmail.com',
       password: 'test',
+      role: 'LOCATION_USER',
     },
   }
 
@@ -164,7 +179,7 @@ describe('POST /users', () => {
     await request(app.getHttpServer()).post('/users').send(reqUser)
 
     expect(userService.create).toHaveBeenCalledTimes(1)
-    expect(userService.create).toHaveBeenCalledWith(reqUser)
+    expect(userService.create).toHaveBeenCalledWith(reqUser, authUser)
   })
 
   it('returns 400 if request body is not correct', async () => {
@@ -183,12 +198,12 @@ describe('POST /users', () => {
 })
 
 describe('PATCH /users/:id', () => {
-  const reqUser = { email: 'email@email.com' }
+  const reqUser = { email: 'email@email.com', role: 'ADMIN', id: 1 }
   const resUser = {
     data: {
       id: 1,
-      name: 'test',
-      surname: 'test',
+      firstName: 'test',
+      lastName: 'test',
       email: 'email@email.com',
       password: 'test',
     },
@@ -216,10 +231,10 @@ describe('PATCH /users/:id', () => {
   it('calls UserService', async () => {
     userService.update.mockResolvedValueOnce(resUser)
 
-    await request(app.getHttpServer()).patch('/users/1').send(reqUser)
+    await request(app.getHttpServer()).patch('/users/1').send(resUser.data)
 
     expect(userService.update).toHaveBeenCalledTimes(1)
-    expect(userService.update).toHaveBeenCalledWith(reqUser, 1)
+    expect(userService.update).toHaveBeenCalledWith(resUser.data, 1, reqUser)
   })
 
   it('returns 400 if ID is not a number', async () => {

@@ -11,13 +11,15 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
-import { HasRoles } from 'src/auth/roles.decorator'
-import { RolesGuard } from 'src/auth/roles.guard'
+import { HasRoles } from '../auth/roles.decorator'
+import { RolesGuard } from '../auth/roles.guard'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { RequestUser } from '../auth/user.decorator'
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserService } from './user.service'
+import { Public } from '../auth/public.decorator'
 
+@Public()
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiTags('users')

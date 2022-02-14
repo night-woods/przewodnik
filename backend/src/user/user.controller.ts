@@ -19,8 +19,6 @@ import { CreateUserDto, UpdateUserDto } from './dto/user.dto'
 import { UserService } from './user.service'
 import { Public } from '../auth/public.decorator'
 
-@Public()
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiTags('users')
 @Controller('users')
@@ -41,6 +39,7 @@ export class UserController {
     return this.service.findById(id, user)
   }
 
+  @Public()
   @ApiOperation({ summary: 'Get user profile' })
   @Get('/me')
   async getProfile(@RequestUser() user) {

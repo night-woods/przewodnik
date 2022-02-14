@@ -3,23 +3,20 @@ import request from 'supertest'
 import {
   createTestingModule,
   TestingModuleUtil,
+  loginUser
 } from '../test-utils/create-testing-module'
 
 let app: INestApplication
 let userService: TestingModuleUtil<'userService'>
-let authService: TestingModuleUtil<'authService'>
 const authUser = {
   id: 1,
   email: 'email@email.com',
   role: 'ADMIN',
 }
 
-beforeAll(async () => {
-  ;({ app, userService, authService } = await createTestingModule())
+beforeEach(async () => {
+  ;({ app, userService } = await createTestingModule(authUser))
   await app.init()
-})
-
-beforeEach(() => {
   jest.resetAllMocks()
 })
 
@@ -60,8 +57,6 @@ describe('GET /users', () => {
   })
 
   it('returns users from UserService', async () => {
-    authService.validateUser.mockResolvedValueOnce(users[0])
-    authService.login.mockResolvedValueOnce({ access_token: 'token' })
     userService.findAll.mockResolvedValueOnce(users)
 
     const response = await request(app.getHttpServer()).get('/users')
@@ -70,13 +65,20 @@ describe('GET /users', () => {
   })
 
   it('calls UserService', async () => {
-    authService.validateUser.mockResolvedValueOnce(users[0])
-    authService.login.mockResolvedValueOnce({ access_token: 'token' })
     userService.findAll.mockResolvedValueOnce(users)
 
     await request(app.getHttpServer()).get('/users')
 
     expect(userService.findAll).toHaveBeenCalledTimes(1)
+  })
+
+  it('should throw error when location user is logged', async ()=>{
+    app = await loginUser(users[0], app)
+    await app.init()
+    userService.findAll.mockResolvedValueOnce(users)
+    
+    const response = await request(app.getHttpServer()).get('/users')
+    console.log(response)
   })
 })
 

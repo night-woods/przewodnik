@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common'
+import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { UserRepository } from '../user/user.repository'
 import { PrismaService } from '../prisma/prisma.service'
@@ -14,15 +14,9 @@ export type TestingModuleUtils = PromiseValue<TestingModuleUtilsPromise>
 export type TestingModuleUtil<K extends keyof TestingModuleUtils> =
   TestingModuleUtils[K]
 
-export const createTestingModule = async () => {
-  const jwtService = {
-    sign: jest.fn(),
-  }
 
-  const authService = {
-    validateUser: jest.fn(),
-    login: jest.fn(),
-  }
+export const createTestingModule = async (loginCredentials) => {
+
   const userService = {
     findAll: jest.fn(),
     findById: jest.fn(),
@@ -48,9 +42,9 @@ export const createTestingModule = async () => {
   const canActivate = (context) => {
     const request = context.switchToHttp().getRequest()
     request.user = {
-      id: 1,
-      email: 'email@email.com',
-      role: 'ADMIN',
+      id: loginCredentials.id,
+      email: loginCredentials.email,
+      role: loginCredentials.role,
     }
     request.requestId = '1'
     return true
@@ -67,10 +61,6 @@ export const createTestingModule = async () => {
     .useValue(prismaService)
     .overrideProvider(UserRepository)
     .useValue(userRepository)
-    .overrideProvider(JwtService)
-    .useValue(jwtService)
-    .overrideProvider(AuthService)
-    .useValue(authService)
     .compile()
 
   const app = module.createNestApplication()
@@ -82,8 +72,25 @@ export const createTestingModule = async () => {
     app,
     userService,
     userRepository,
-    prismaService,
-    jwtService,
-    authService,
+    prismaService
   }
+}
+
+export const loginUser= async (loginCredentials, app: INestApplication) =>{
+
+  const canActivate = (context) => {
+    const request = context.switchToHttp().getRequest()
+    request.user = {
+      id: loginCredentials.id,
+      email: loginCredentials.email,
+      role: loginCredentials.role,
+    }
+    request.requestId = '1'
+    return true
+  }
+
+    app.useGlobalPipes(new ValidationPipe({ transform: true }))
+    app.useGlobalGuards({ canActivate })
+  return app
+
 }

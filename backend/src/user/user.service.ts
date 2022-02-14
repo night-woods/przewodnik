@@ -28,15 +28,16 @@ export class UserService {
     }
   }
 
-  async findById(id: number, user?: User) {
+  async findById(id: number, currentUser: User) {
     const foundUser = await this.userRepository.findById(id)
-    if (user) user = (await this.findByEmail(user.email)).data
+    const loggedUser=(await this.findByEmail(currentUser.email)).data
+
     if (!foundUser) {
       throw new NotFoundException('User with given ID not found')
-    } else if (
-      user &&
-      user.role == Role.LOCATION_ADMIN &&
-      user.locationId !== foundUser.locationId
+    } 
+    if (
+      loggedUser.role === String(Role.LOCATION_ADMIN) &&
+      loggedUser.locationId !== foundUser.locationId
     ) {
       throw new ForbiddenException(
         'User with given ID is not in your location!',
@@ -48,54 +49,44 @@ export class UserService {
     }
   }
 
-  async create(data: CreateUserDto, user?: User) {
-    data.password = await hash(data.password, 10)
+  async create(data: CreateUserDto, currentUser: User) {
+    const hashedPass = await hash(data.password, 10)
     if (
-      user &&
-      user.role === String(Role.LOCATION_ADMIN) &&
+      currentUser.role === String(Role.LOCATION_ADMIN) &&
       data.role !== String(Role.LOCATION_USER)
     ) {
       throw new ForbiddenException('You cannot create other admins')
-    } else if (user && user.role == Role.LOCATION_ADMIN) {
-      data.locationId = await (
-        await this.findByEmail(user.email)
-      ).data.locationId
+    } 
+    if (currentUser.role === Role.LOCATION_ADMIN) {
+      data.locationId = currentUser.locationId
     }
     return {
-      data: await this.userRepository.create(data),
+      data: await this.userRepository.create({...data, password: hashedPass}),
     }
   }
 
-  async update(data: UpdateUserDto, id: number, user?: User) {
-    const foundedUser = await this.findById(id, user)
+  async update(data: UpdateUserDto, id: number, currentUser: User) {
+    const foundUser = await this.findById(id, currentUser)
     if (
-      user &&
-      user.role == Role.LOCATION_ADMIN &&
-      foundedUser.data.role != Role.LOCATION_USER
+      currentUser.role === Role.LOCATION_ADMIN &&
+      foundUser.data.role !== Role.LOCATION_USER
     ) {
       throw new ForbiddenException('You cannot update other admins')
-    } else if (
-      user &&
-      user.role == Role.LOCATION_ADMIN &&
-      data.locationId &&
-      foundedUser.data?.locationId != data.locationId
-    ) {
-      throw new ForbiddenException('You cannot change locationId of this user!')
-    }
-    return { data: await this.userRepository.update(data, foundedUser.data.id) }
+    } 
+
+    return { data: await this.userRepository.update(data, foundUser.data.id) }
   }
 
-  async delete(id: number, user?: User) {
-    const foundedUser = await this.findById(id, user)
+  async delete(id: number, currentUser: User) {
+    const foundUser = await this.findById(id, currentUser)
 
     if (
-      user &&
-      user.role == Role.LOCATION_ADMIN &&
-      foundedUser.data.role != Role.LOCATION_USER
+      currentUser.role === Role.LOCATION_ADMIN &&
+      foundUser.data.role !== Role.LOCATION_USER
     ) {
       throw new ForbiddenException('You cannot delete other admins')
     }
 
-    await this.userRepository.delete(foundedUser.data.id)
+    await this.userRepository.delete(foundUser.data.id)
   }
 }

@@ -1,7 +1,9 @@
 import Image from 'next/image'
 import useTranslation from 'next-translate/useTranslation'
+import { useSession } from 'next-auth/react'
 
 export const UserProfileButton = () => {
+  const { data: session } = useSession()
   const { t } = useTranslation()
 
   return (
@@ -18,7 +20,9 @@ export const UserProfileButton = () => {
             />
           </div>
           <div className="ml-3">
-            <p className="text-base font-medium text-white">Jan Nowak</p>
+            <p className="text-base font-medium text-white">
+              {session?.user?.name}
+            </p>
             <p className="text-sm font-medium text-gray-400 group-hover:text-gray-300">
               {t('global:userProfile')}
             </p>

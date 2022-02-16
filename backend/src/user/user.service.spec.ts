@@ -5,23 +5,23 @@ import { Role } from '@prisma/client'
 
 let userRepository
 let sut: UserService
-const locationAdminMock = {
-  id:4,
-  firstName: 'firstName',
-  lastName: 'lastName',
-  email: 'test@mail.com',
-  password: 'password',
-  role: Role.LOCATION_ADMIN,
-  locationId: 1
-}
 beforeAll(async () => {
-  ;({ userRepository } = await createTestingModule({id: locationAdminMock, email: locationAdminMock.email, role: locationAdminMock.role}))
+  ;({ userRepository } = await createTestingModule())
   sut = new UserService(userRepository as any)
 })
 describe('UserService', () => {
   beforeEach(() => {
     jest.resetAllMocks()
   })
+  const locationAdminMock = {
+    id:4,
+    firstName: 'firstName',
+    lastName: 'lastName',
+    email: 'test@mail.com',
+    password: 'password',
+    role: Role.LOCATION_ADMIN,
+    locationId: 1
+  }
   const users = [
     {
       id: 1,

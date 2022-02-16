@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { UserRepository } from '../user/user.repository'
 import { PrismaService } from '../prisma/prisma.service'
@@ -14,8 +14,7 @@ export type TestingModuleUtils = PromiseValue<TestingModuleUtilsPromise>
 export type TestingModuleUtil<K extends keyof TestingModuleUtils> =
   TestingModuleUtils[K]
 
-
-export const createTestingModule = async (loginCredentials) => {
+export const createTestingModule = async () => {
 
   const userService = {
     findAll: jest.fn(),
@@ -35,16 +34,36 @@ export const createTestingModule = async (loginCredentials) => {
     delete: jest.fn(),
   }
 
+  const jwtService = {
+    sign: jest.fn()
+  }
+
   const prismaService = {
     user: { findUnique: jest.fn() },
   }
 
   const canActivate = (context) => {
     const request = context.switchToHttp().getRequest()
-    request.user = {
-      id: loginCredentials.id,
-      email: loginCredentials.email,
-      role: loginCredentials.role,
+    if (request.headers.authorization === "location_user"){
+      request.user = { 
+        id: '1',
+        email: 'test@mail.com',
+        role: 'LOCATION_USER'
+      }
+    }
+    else if (request.headers.authorization === "location_admin"){
+      request.user = {
+        id: '1',
+        email: 'test@mail.com',
+        role: 'LOCATION_ADMIN'
+      }
+    }
+    else if(request.headers.authorization === "admin"){
+      request.user = {
+        id: '1',
+        email: 'test@mail.com',
+        role: 'ADMIN'
+      }
     }
     request.requestId = '1'
     return true
@@ -61,6 +80,8 @@ export const createTestingModule = async (loginCredentials) => {
     .useValue(prismaService)
     .overrideProvider(UserRepository)
     .useValue(userRepository)
+    .overrideProvider(JwtService)
+    .useValue(jwtService)
     .compile()
 
   const app = module.createNestApplication()
@@ -72,25 +93,7 @@ export const createTestingModule = async (loginCredentials) => {
     app,
     userService,
     userRepository,
-    prismaService
+    prismaService,
+    jwtService
   }
-}
-
-export const loginUser= async (loginCredentials, app: INestApplication) =>{
-
-  const canActivate = (context) => {
-    const request = context.switchToHttp().getRequest()
-    request.user = {
-      id: loginCredentials.id,
-      email: loginCredentials.email,
-      role: loginCredentials.role,
-    }
-    request.requestId = '1'
-    return true
-  }
-
-    app.useGlobalPipes(new ValidationPipe({ transform: true }))
-    app.useGlobalGuards({ canActivate })
-  return app
-
 }

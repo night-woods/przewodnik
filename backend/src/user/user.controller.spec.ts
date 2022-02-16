@@ -3,20 +3,23 @@ import request from 'supertest'
 import {
   createTestingModule,
   TestingModuleUtil,
-  loginUser
 } from '../test-utils/create-testing-module'
 
 let app: INestApplication
 let userService: TestingModuleUtil<'userService'>
 const authUser = {
-  id: 1,
-  email: 'email@email.com',
-  role: 'ADMIN',
+  id: '1',
+  email: 'test@mail.com',
+  role: 'ADMIN'
 }
+const userTokens = ["location_admin", 'location_user', 'admin']
 
-beforeEach(async () => {
-  ;({ app, userService } = await createTestingModule(authUser))
+beforeAll(async () => {
+  ;({ app, userService } = await createTestingModule())
   await app.init()
+})
+
+beforeEach(() => {
   jest.resetAllMocks()
 })
 
@@ -53,13 +56,13 @@ describe('GET /users', () => {
   it('returns 200', async () => {
     userService.findAll.mockResolvedValueOnce(users)
 
-    await request(app.getHttpServer()).get('/users').expect(200)
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[2]).expect(200)
   })
 
   it('returns users from UserService', async () => {
     userService.findAll.mockResolvedValueOnce(users)
 
-    const response = await request(app.getHttpServer()).get('/users')
+    const response = await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[2])
 
     expect(response.body).toEqual(users)
   })
@@ -67,50 +70,46 @@ describe('GET /users', () => {
   it('calls UserService', async () => {
     userService.findAll.mockResolvedValueOnce(users)
 
-    await request(app.getHttpServer()).get('/users')
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[2])
 
     expect(userService.findAll).toHaveBeenCalledTimes(1)
   })
 
   it('should throw error when location user is logged', async ()=>{
-    app = await loginUser(users[0], app)
-    await app.init()
-    userService.findAll.mockResolvedValueOnce(users)
-    
-    const response = await request(app.getHttpServer()).get('/users')
-    console.log(response)
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[1]).expect(403)
+  })
+
+  it('should throw error when location admin is logged', async ()=>{
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[0]).expect(403)
   })
 })
 
 describe('GET /users/:id', () => {
   const user = {
-    data: {
       id: 1,
       firstName: 'test',
       lastName: 'test',
       email: 'test@gmail.com',
       password: 'test',
-    },
   }
 
   it('returns 200', async () => {
     userService.findById.mockResolvedValueOnce(user)
 
-    await request(app.getHttpServer()).get('/users/1').expect(200)
+    await request(app.getHttpServer()).get('/users/1').set("Authorization", userTokens[2]).expect(200)
   })
 
   it('returns user from UserService', async () => {
     userService.findById.mockResolvedValueOnce(user)
 
-    const response = await request(app.getHttpServer()).get('/users/1')
-
+    const response = await request(app.getHttpServer()).get('/users/1').set("Authorization", userTokens[2])
     expect(response.body).toEqual(user)
   })
 
   it('calls UserService', async () => {
     userService.findById.mockResolvedValueOnce(user)
 
-    await request(app.getHttpServer()).get('/users/13')
+    await request(app.getHttpServer()).get('/users/13').set("Authorization", userTokens[2])
 
     expect(userService.findById).toHaveBeenCalledTimes(1)
     expect(userService.findById).toHaveBeenCalledWith(13, authUser)
@@ -119,24 +118,32 @@ describe('GET /users/:id', () => {
   it('returns 400 if ID is not a number', async () => {
     userService.findById.mockResolvedValueOnce(user)
 
-    await request(app.getHttpServer()).get('/users/thirteen').expect(400)
+    await request(app.getHttpServer()).get('/users/thirteen').set("Authorization", userTokens[2]).expect(400)
+  })
+
+  it('should throw error when location user is logged', async ()=>{
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[1]).expect(403)
   })
 })
 
 describe('DELETE /users/:id', () => {
   it('returns 200', async () => {
-    await request(app.getHttpServer()).delete('/users/1').expect(200)
+    await request(app.getHttpServer()).delete('/users/1').set("Authorization", userTokens[2]).expect(200)
   })
 
   it('calls UserService', async () => {
-    await request(app.getHttpServer()).delete('/users/1')
+    await request(app.getHttpServer()).delete('/users/1').set("Authorization", userTokens[2])
 
     expect(userService.delete).toHaveBeenCalledTimes(1)
     expect(userService.delete).toHaveBeenCalledWith(1, authUser)
   })
 
   it('returns 400 if ID is not a number', async () => {
-    await request(app.getHttpServer()).delete('/users/thirteen').expect(400)
+    await request(app.getHttpServer()).delete('/users/thirteen').set("Authorization", userTokens[2]).expect(400)
+  })
+  
+  it('should throw error when location user is logged', async ()=>{
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[1]).expect(403)
   })
 })
 
@@ -162,14 +169,14 @@ describe('POST /users', () => {
   it('returns 201', async () => {
     userService.create.mockResolvedValueOnce(resUser)
 
-    await request(app.getHttpServer()).post('/users').send(reqUser).expect(201)
+    await request(app.getHttpServer()).post('/users').set("Authorization", userTokens[2]).send(reqUser).expect(201)
   })
 
   it('returns created user', async () => {
     userService.create.mockResolvedValueOnce(resUser)
 
     const response = await request(app.getHttpServer())
-      .post('/users')
+      .post('/users').set("Authorization", userTokens[2])
       .send(reqUser)
 
     expect(response.body).toEqual(resUser)
@@ -178,7 +185,7 @@ describe('POST /users', () => {
   it('calls UserService', async () => {
     userService.create.mockResolvedValueOnce(resUser)
 
-    await request(app.getHttpServer()).post('/users').send(reqUser)
+    await request(app.getHttpServer()).post('/users').set("Authorization", userTokens[2]).send(reqUser)
 
     expect(userService.create).toHaveBeenCalledTimes(1)
     expect(userService.create).toHaveBeenCalledWith(reqUser, authUser)
@@ -188,19 +195,22 @@ describe('POST /users', () => {
     userService.create.mockResolvedValueOnce(resUser)
 
     await request(app.getHttpServer())
-      .post('/users')
+      .post('/users').set("Authorization", userTokens[2])
       .send(undefined)
       .expect(400)
 
     await request(app.getHttpServer())
-      .post('/users')
+      .post('/users').set("Authorization", userTokens[2])
       .send({ ...reqUser, email: 'email.com' })
       .expect(400)
+  })
+
+  it('should throw error when location user is logged', async ()=>{
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[1]).expect(403)
   })
 })
 
 describe('PATCH /users/:id', () => {
-  const reqUser = { email: 'email@email.com', role: 'ADMIN', id: 1 }
   const resUser = {
     data: {
       id: 1,
@@ -215,8 +225,8 @@ describe('PATCH /users/:id', () => {
     userService.update.mockResolvedValueOnce(resUser)
 
     await request(app.getHttpServer())
-      .patch('/users/1')
-      .send(reqUser)
+      .patch('/users/1').set("Authorization", userTokens[2])
+      .send(resUser.data)
       .expect(200)
   })
 
@@ -224,8 +234,8 @@ describe('PATCH /users/:id', () => {
     userService.update.mockResolvedValueOnce(resUser)
 
     const response = await request(app.getHttpServer())
-      .patch('/users/1')
-      .send(reqUser)
+      .patch('/users/1').set("Authorization", userTokens[2])
+      .send(resUser.data)
 
     expect(response.body).toEqual(resUser)
   })
@@ -233,18 +243,18 @@ describe('PATCH /users/:id', () => {
   it('calls UserService', async () => {
     userService.update.mockResolvedValueOnce(resUser)
 
-    await request(app.getHttpServer()).patch('/users/1').send(resUser.data)
+    await request(app.getHttpServer()).patch('/users/1').set("Authorization", userTokens[2]).send(resUser.data)
 
     expect(userService.update).toHaveBeenCalledTimes(1)
-    expect(userService.update).toHaveBeenCalledWith(resUser.data, 1, reqUser)
+    expect(userService.update).toHaveBeenCalledWith(resUser.data, 1, authUser)
   })
 
   it('returns 400 if ID is not a number', async () => {
     userService.update.mockResolvedValueOnce(resUser)
 
     await request(app.getHttpServer())
-      .patch('/users/thirteen')
-      .send(reqUser)
+      .patch('/users/thirteen').set("Authorization", userTokens[2])
+      .send(resUser.data)
       .expect(400)
   })
 
@@ -253,8 +263,12 @@ describe('PATCH /users/:id', () => {
     userService.update.mockResolvedValueOnce(resUser)
 
     await request(app.getHttpServer())
-      .patch('/users/1')
+      .patch('/users/1').set("Authorization", userTokens[2])
       .send(badReqUser)
       .expect(400)
+  })
+
+  it('should throw error when location user is logged', async ()=>{
+    await request(app.getHttpServer()).get('/users').set("Authorization", userTokens[1]).expect(403)
   })
 })

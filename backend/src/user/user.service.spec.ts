@@ -1,7 +1,5 @@
 import { NotFoundException } from '@nestjs/common'
-import {
-  createTestingModule,
-} from '../test-utils/create-testing-module'
+import { createTestingModule } from '../test-utils/create-testing-module'
 import { UserService } from './user.service'
 
 let userRepository

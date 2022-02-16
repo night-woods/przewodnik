@@ -1,0 +1,11 @@
+{
+  "locales": ["pl", "en"],
+  "defaultLocale": "pl",
+  "pages": {
+    "*": ["global", "home"],
+    "/guide": ["guide"],
+    "/calendar": ["calendar"],
+    "/locations": ["locations"],
+    "/users": ["users"]
+  }
+}

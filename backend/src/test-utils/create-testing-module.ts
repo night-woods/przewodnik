@@ -5,8 +5,6 @@ import { PrismaService } from '../prisma/prisma.service'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/user.service'
 import { JwtService } from '@nestjs/jwt'
-import { AuthService } from '../auth/auth.service'
-import { UserController } from '../user/user.controller'
 
 type PromiseValue<T> = T extends PromiseLike<infer U> ? U : T
 export type TestingModuleUtilsPromise = ReturnType<typeof createTestingModule>
@@ -15,7 +13,6 @@ export type TestingModuleUtil<K extends keyof TestingModuleUtils> =
   TestingModuleUtils[K]
 
 export const createTestingModule = async () => {
-
   const userService = {
     findAll: jest.fn(),
     findById: jest.fn(),
@@ -35,7 +32,7 @@ export const createTestingModule = async () => {
   }
 
   const jwtService = {
-    sign: jest.fn()
+    sign: jest.fn(),
   }
 
   const prismaService = {
@@ -44,35 +41,35 @@ export const createTestingModule = async () => {
 
   const canActivate = (context) => {
     const request = context.switchToHttp().getRequest()
-    if (request.headers.authorization === "location_user"){
-      request.user = { 
-        id: '1',
-        email: 'test@mail.com',
-        role: 'LOCATION_USER'
-      }
+    switch (request.headers.authorization) {
+      case 'location_user':
+        request.user = {
+          id: '1',
+          email: 'test@mail.com',
+          role: 'LOCATION_USER',
+        }
+        break
+      case 'location_admin':
+        request.user = {
+          id: '1',
+          email: 'test@mail.com',
+          role: 'LOCATION_ADMIN',
+        }
+        break
+      default:
+        request.user = {
+          id: '1',
+          email: 'test@mail.com',
+          role: 'ADMIN',
+        }
     }
-    else if (request.headers.authorization === "location_admin"){
-      request.user = {
-        id: '1',
-        email: 'test@mail.com',
-        role: 'LOCATION_ADMIN'
-      }
-    }
-    else if(request.headers.authorization === "admin"){
-      request.user = {
-        id: '1',
-        email: 'test@mail.com',
-        role: 'ADMIN'
-      }
-    }
+
     request.requestId = '1'
     return true
   }
 
   const module = await Test.createTestingModule({
     imports: [UserModule, UserRepository],
-    providers: [UserService],
-    controllers: [UserController],
   })
     .overrideProvider(UserService)
     .useValue(userService)
@@ -94,6 +91,6 @@ export const createTestingModule = async () => {
     userService,
     userRepository,
     prismaService,
-    jwtService
+    jwtService,
   }
 }

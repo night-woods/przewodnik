@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/user.service'
 import { JwtService } from '@nestjs/jwt'
+import { ConfigModule } from '@nestjs/config'
 
 type PromiseValue<T> = T extends PromiseLike<infer U> ? U : T
 export type TestingModuleUtilsPromise = ReturnType<typeof createTestingModule>
@@ -69,7 +70,7 @@ export const createTestingModule = async () => {
   }
 
   const module = await Test.createTestingModule({
-    imports: [UserModule, UserRepository],
+    imports: [UserModule, UserRepository, ConfigModule.forRoot()],
   })
     .overrideProvider(UserService)
     .useValue(userService)

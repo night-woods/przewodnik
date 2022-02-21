@@ -5,9 +5,16 @@ import { RolesGuard } from './auth/roles.guard'
 import { LocationModule } from './location/location.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserModule } from './user/user.module'
+import { ConfigModule } from '@nestjs/config'
 
 @Module({
-  imports: [UserModule, PrismaModule, AuthModule, LocationModule],
+  imports: [
+    UserModule,
+    PrismaModule,
+    AuthModule,
+    LocationModule,
+    ConfigModule.forRoot(),
+  ],
   controllers: [],
   providers: [
     {

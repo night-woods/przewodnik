@@ -4,6 +4,8 @@ import { UserRepository } from '../user/user.repository'
 import { PrismaService } from '../prisma/prisma.service'
 import { UserModule } from '../user/user.module'
 import { UserService } from '../user/user.service'
+import { JwtService } from '@nestjs/jwt'
+import { ConfigModule } from '@nestjs/config'
 
 type PromiseValue<T> = T extends PromiseLike<infer U> ? U : T
 export type TestingModuleUtilsPromise = ReturnType<typeof createTestingModule>
@@ -14,7 +16,8 @@ export type TestingModuleUtil<K extends keyof TestingModuleUtils> =
 export const createTestingModule = async () => {
   const userService = {
     findAll: jest.fn(),
-    findOne: jest.fn(),
+    findById: jest.fn(),
+    findByEmail: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
@@ -22,10 +25,15 @@ export const createTestingModule = async () => {
 
   const userRepository = {
     findAll: jest.fn(),
-    findOne: jest.fn(),
+    findById: jest.fn(),
+    findByEmail: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+  }
+
+  const jwtService = {
+    sign: jest.fn(),
   }
 
   const prismaService = {
@@ -34,16 +42,35 @@ export const createTestingModule = async () => {
 
   const canActivate = (context) => {
     const request = context.switchToHttp().getRequest()
-    request.user = {
-      id: 1,
-      email: 'email@email.com',
+    switch (request.headers.authorization) {
+      case 'location_user':
+        request.user = {
+          id: '1',
+          email: 'test@mail.com',
+          role: 'LOCATION_USER',
+        }
+        break
+      case 'location_admin':
+        request.user = {
+          id: '1',
+          email: 'test@mail.com',
+          role: 'LOCATION_ADMIN',
+        }
+        break
+      default:
+        request.user = {
+          id: '1',
+          email: 'test@mail.com',
+          role: 'ADMIN',
+        }
     }
+
     request.requestId = '1'
     return true
   }
 
   const module = await Test.createTestingModule({
-    imports: [UserModule, UserRepository],
+    imports: [UserModule, UserRepository, ConfigModule.forRoot()],
   })
     .overrideProvider(UserService)
     .useValue(userService)
@@ -51,6 +78,8 @@ export const createTestingModule = async () => {
     .useValue(prismaService)
     .overrideProvider(UserRepository)
     .useValue(userRepository)
+    .overrideProvider(JwtService)
+    .useValue(jwtService)
     .compile()
 
   const app = module.createNestApplication()
@@ -63,5 +92,6 @@ export const createTestingModule = async () => {
     userService,
     userRepository,
     prismaService,
+    jwtService,
   }
 }

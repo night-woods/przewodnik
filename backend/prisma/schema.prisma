@@ -11,9 +11,24 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  surname  String
-  email    String @unique
-  password String
+  id         Int       @id @default(autoincrement())
+  firstName  String
+  lastName   String
+  email      String    @unique
+  password   String
+  role       Role?
+  locationId Int?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+}
+
+model Location {
+  id   Int    @id @default(autoincrement())
+  User User[]
+}
+
+enum Role {
+  ADMIN
+  LOCATION_ADMIN
+  LOCATION_USER
 }

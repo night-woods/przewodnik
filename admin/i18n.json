@@ -6,6 +6,7 @@
     "/guide": ["guide"],
     "/calendar": ["calendar"],
     "/locations": ["locations"],
-    "/users": ["users"]
+    "/users": ["users"],
+    "/auth/signin": ["signin"]
   }
 }

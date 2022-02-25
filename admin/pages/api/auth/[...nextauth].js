@@ -14,10 +14,17 @@ export default NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const response = await fetch('http://localhost:3001/api/v1/users', {
-          method: 'POST',
-          body: JSON.stringify(credentials),
-        })
+        // Add logic here to look up the user from the credentials supplied
+        // POST /auth/login
+        // const response = await fetch('http://localhost:3001/api/v1/login', {
+        //   method: 'POST',
+        //   body: JSON.stringify(credentials),
+        // })
+        // const token = ...
+        // const response2 = await fetch('http://localhost:3001/api/v1/users/me', {
+        //   method: 'GET',
+        //   headers: { 'Authorization': `Bearer ${token}`}
+        // })
 
         const user = {
           id: 1,

@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*.*.*'
+  pull_request:
+
+jobs:
+ lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: actions/checkout@v2
+    -
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.15.4'
+    - 
+      run: npm install
+      working-directory: backend
+    - 
+      run: npm run lint:check
+      working-directory: backend
+ format:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: actions/checkout@v2
+    -
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.15.4'
+    - 
+      run: npm install
+      working-directory: backend
+    - 
+      run: npm run format:check
+      working-directory: backend
+ test:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: actions/checkout@v2
+    -
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.15.4'
+    -
+      run: cp .example.env .env 
+      working-directory: backend
+    -
+      run: npm install
+      working-directory: backend
+    - 
+      run: npm run test
+      working-directory: backend

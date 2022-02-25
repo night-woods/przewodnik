@@ -30,11 +30,11 @@ export class UserService {
 
   async findById(id: number, currentUser: User) {
     const foundUser = await this.userRepository.findById(id)
-    const loggedUser=(await this.findByEmail(currentUser.email)).data
+    const loggedUser = (await this.findByEmail(currentUser.email)).data
 
     if (!foundUser) {
       throw new NotFoundException('User with given ID not found')
-    } 
+    }
     if (
       loggedUser.role === String(Role.LOCATION_ADMIN) &&
       loggedUser.locationId !== foundUser.locationId
@@ -56,12 +56,12 @@ export class UserService {
       data.role !== String(Role.LOCATION_USER)
     ) {
       throw new ForbiddenException('You cannot create other admins')
-    } 
+    }
     if (currentUser.role === Role.LOCATION_ADMIN) {
       data.locationId = currentUser.locationId
     }
     return {
-      data: await this.userRepository.create({...data, password: hashedPass}),
+      data: await this.userRepository.create({ ...data, password: hashedPass }),
     }
   }
 
@@ -72,7 +72,7 @@ export class UserService {
       foundUser.data.role !== Role.LOCATION_USER
     ) {
       throw new ForbiddenException('You cannot update other admins')
-    } 
+    }
 
     return { data: await this.userRepository.update(data, foundUser.data.id) }
   }

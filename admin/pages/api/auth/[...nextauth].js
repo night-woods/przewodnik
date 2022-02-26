@@ -16,14 +16,18 @@ export default NextAuth({
       async authorize(credentials) {
         // Add logic here to look up the user from the credentials supplied
         // POST /auth/login
-        // const response = await fetch('http://localhost:3001/api/v1/login', {
-        //   method: 'POST',
-        //   body: JSON.stringify(credentials),
-        // })
-        // const token = ...
-        // const response2 = await fetch('http://localhost:3001/api/v1/users/me', {
+        const tokenResponse = await fetch(
+          'http://localhost:3001/api/v1/auth/login',
+          {
+            method: 'POST',
+            body: JSON.stringify(credentials),
+          },
+        )
+        const token = await tokenResponse.json()
+
+        // const userResponse = await fetch('http://localhost:3001/api/v1/users/me', {
         //   method: 'GET',
-        //   headers: { 'Authorization': `Bearer ${token}`}
+        //   headers: { Authorization: `Bearer ${token}` },
         // })
 
         const user = {

@@ -14,30 +14,34 @@ export default NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Add logic here to look up the user from the credentials supplied
-        // POST /auth/login
         const tokenResponse = await fetch(
           'http://localhost:3001/api/v1/auth/login',
           {
             method: 'POST',
-            body: JSON.stringify(credentials),
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+            headers: { 'content-type': 'application/json' },
           },
         )
-        const token = await tokenResponse.json()
+        const { access_token } = await tokenResponse.json()
 
-        // const userResponse = await fetch('http://localhost:3001/api/v1/users/me', {
-        //   method: 'GET',
-        //   headers: { Authorization: `Bearer ${token}` },
-        // })
+        const userResponse = await fetch(
+          'http://localhost:3001/api/v1/users/me',
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${access_token}` },
+          },
+        )
 
-        const user = {
-          id: 1,
-          name: 'Jan Kowalski',
-          email: 'jan.kowalski@email.pl',
-        }
+        const user = await userResponse.json()
 
         if (user) {
-          return user
+          return {
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+          }
         }
         return null
       },

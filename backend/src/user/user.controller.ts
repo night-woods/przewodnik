@@ -24,6 +24,12 @@ import { Public } from '../auth/public.decorator'
 export class UserController {
   constructor(private readonly service: UserService) {}
 
+  @ApiOperation({ summary: 'Get user profile' })
+  @Get('/me')
+  async getProfile(@RequestUser() user) {
+    return user
+  }
+
   @HasRoles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @Get()
@@ -36,13 +42,6 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number, @RequestUser() user) {
     return this.service.findById(id, user)
-  }
-
-  @Public()
-  @ApiOperation({ summary: 'Get user profile' })
-  @Get('/me')
-  async getProfile(@RequestUser() user) {
-    return user
   }
 
   @UseGuards(RolesGuard)

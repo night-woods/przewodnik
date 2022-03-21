@@ -3,6 +3,7 @@ import { ApiBody, ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger'
 import { IsNotEmpty } from 'class-validator'
 import { AuthService } from './auth.service'
 import { LocalAuthGuard } from './local-auth.guard'
+import { Public } from './public.decorator'
 
 class LoginProperties {
   @ApiProperty()
@@ -22,6 +23,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @ApiOperation({ summary: 'Log in' })
   @ApiBody({ type: LoginProperties })
+  @Public()
   @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.body)
